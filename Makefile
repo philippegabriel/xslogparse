@@ -1,3 +1,8 @@
+#!/usr/bin/make -f
+.PHONY: login test clean reallyclean
+#PostgreSQL server params, read from .config file
+config:=config.xslogparse/.config
+
 seq:=$(shell seq 10 33)
 lextargets:=$(foreach i,$(seq),xensource.log.$(i).lex)
 csvtargets:=$(foreach i,$(seq),xensource.log.$(i).csv)
@@ -13,6 +18,8 @@ xensource.ranked.lex: xensource.lex
 	./log2csv.pl $< >$@
 xensource.csv: $(csvtargets)
 	cat $^ >$@
+login:
+	source $(config) ; psql
 test:
 	@echo $(csvtargets)
 clean:

@@ -1,0 +1,3 @@
+[submodule "config.xslogparse"]
+	path = config.xslogparse
+	url = https://gitlab.citrite.net/philippeg/config.xslogparse.git
