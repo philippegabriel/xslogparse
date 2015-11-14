@@ -20,12 +20,14 @@ xensource.csv: $(csvtargets)
 	cat $^ >$@
 login:
 	source $(config) ; psql
-initdb:
+initdb: schema.sql
 	source $(config) ; psql -f schema.sql
-copytables:
+copytables: xensource.csv
 	source $(config) ; psql -c "\copy xensource from xensource.csv with CSV;" 
-resetdb:
+resetdb: reset.table.sql
 	source $(config) ; psql -f reset.table.sql
+query: taskduration.sql
+	source $(config) ; psql --field-separator="," --no-align --tuples-only -f taskduration.sql -o taskduration.csv
 test:
 	@echo $(csvtargets)
 clean:
