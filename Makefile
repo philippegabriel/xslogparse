@@ -20,6 +20,12 @@ xensource.csv: $(csvtargets)
 	cat $^ >$@
 login:
 	source $(config) ; psql
+initdb:
+	source $(config) ; psql -f schema.sql
+copytables:
+	source $(config) ; psql -c "\copy xensource from xensource.csv with CSV;" 
+resetdb:
+	source $(config) ; psql -f reset.table.sql
 test:
 	@echo $(csvtargets)
 clean:
