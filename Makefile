@@ -28,6 +28,8 @@ resetdb: reset.table.sql
 	source $(config) ; psql -f reset.table.sql
 query: taskduration.sql
 	source $(config) ; psql --field-separator="," --no-align --tuples-only -f taskduration.sql -o taskduration.csv
+plot:
+	gnuplot taskduration.gnuplot
 test:
 	@echo $(csvtargets)
 clean:
