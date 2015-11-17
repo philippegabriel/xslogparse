@@ -10,6 +10,8 @@ csvtargets:=$(foreach i,$(seq),xensource.log.$(i).csv)
 all: xensource.csv
 xensource.lex: $(lextargets)
 	cat $^ | sort | uniq -c >$@
+xensource.sorted.lex: $(lextargets)
+	cat $^ | sort | uniq >$@
 xensource.ranked.lex: xensource.lex
 	sort -nr $< | perl -pe 's/^\s+(\d+)\s+(.*)$$/\1,\2/' > $@
 %.lex: %
@@ -36,4 +38,3 @@ clean:
 	rm -f xensource.lex xensource.ranked.lex xensource.csv
 reallyclean: clean
 	rm -f $(lextargets) $(csvtargets)
-
