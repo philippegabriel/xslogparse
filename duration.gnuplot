@@ -1,11 +1,13 @@
 set terminal png size 1200, 800
-set title "duration"
-set datafile separator comma
-set output "taskduration.png"
+set title infile
+set datafile separator ','
+set output outfile
 set xdata time
 set timefmt "%Y-%m-%d %H:%M:%S"
 set format x "%Y-%m-%d\n%H:%M:%S"
-set ylabel "seconds\nlog scale"
+set ylabel "duration in seconds\n(log scale)"
+set xlabel "Start of operation"
+set key autotitle columnhead
 set logscale y 10
-#set xtics rotate by 45
-plot "taskduration.csv" using 1:2 title 'duration' with points pointtype 7 pointsize 1
+plot infile using 1:3 with impulses 
+	
