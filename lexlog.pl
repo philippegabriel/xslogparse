@@ -7,13 +7,14 @@
 while(<>){
 #find mesg
 s/^.*?\](.*)$/\1/;
+#ipv6 address e.g. fdac:fcf1:05f2:2352:0812:171b:0fb6:c7d4
+s/[[:xdigit:]]{4}:[[:xdigit:]]{4}:[[:xdigit:]]{4}:[[:xdigit:]]{4}:[[:xdigit:]]{4}:[[:xdigit:]]{4}:[[:xdigit:]]{4}:[[:xdigit:]]{4}/<ipv6>/g;
 #subst ref
 s/[[:xdigit:]]{2,12}-[[:xdigit:]]{2,12}-[[:xdigit:]]{2,12}-[[:xdigit:]]{2,12}-[[:xdigit:]]{2,12}/<ref>/g;
+#mac address e.g. de:d3:82:01:02:49
+s/[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}/<mac>/g;
 #subst hex
 s/[[:xdigit:]]{6,}/<hex>/g;
-#mac address
-#de:d3:82:01:02:49
-s/[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}:[[:xdigit:]]{2}/<mac>/g;
 #get rid of nums
 s/\d+/<int>/g;
 print $_;
