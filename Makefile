@@ -6,7 +6,9 @@ config:=config.xslogparse/.config
 seq:=$(shell seq 10 33)
 lextargets:=$(foreach i,$(seq),xensource.log.$(i).lex)
 csvtargets:=$(foreach i,$(seq),xensource.log.$(i).csv)
-
+tasks:=VDI.create VDI.attach VBD.create VBD.plug VM.clean_shutdown VM.destroy VM.start
+querytargets:=$(foreach i,$(tasks),duration.$i.csv)
+plottargets:=$(subst .csv,.png,$(querytargets))
 all: xensource.csv
 xensource.lex: $(lextargets)
 	cat $^ | sort | uniq -c >$@
@@ -28,14 +30,20 @@ copytables: xensource.csv
 	source $(config) ; psql -c "\copy xensource from xensource.csv with CSV;" 
 resetdb: reset.table.db
 	source $(config) ; psql -f $<
-%.csv : %.sql
-	source $(config) ; psql --field-separator="," --no-align --tuples-only -f $< -o $@
-query: taskduration.csv VBDPlug.csv
-
-plot:
-	gnuplot taskduration.gnuplot
+duration.%.csv : duration.sql
+	source $(config) ; psql --field-separator="," --no-align --pset footer=off --variable=TASK="$*" -f $< -o $@
+%.png: %.csv
+	gnuplot -e "outfile='$@';infile='$<'" duration.gnuplot
+query: $(querytargets)
+plot: $(plottargets) 
 test:
 	@echo $(csvtargets)
+deploy:
+	source $(config) ; scp *.png *.html $$WWW
+qclean:
+	rm -f $(querytargets)
+pclean:
+	rm -f $(plottargets)
 clean:
 	rm -f xensource.lex xensource.ranked.lex xensource.csv
 reallyclean: clean
