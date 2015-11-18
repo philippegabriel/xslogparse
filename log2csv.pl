@@ -19,20 +19,25 @@ if($msg =~ /last message repeated/){
 else{
 	$msg =~ /^(.*?)\s+(.*?)$/ or die "bad format at line:$i\n$_\n";
 	($pgm,$msg)=($1,$2);
+#Extract xapi header 
 #subst [,],| for comma in xapi header
 #[debug|2r188x11|192 pool_db_sync|Pool DB sync D:01b05b091868|mscgen] xapi=>xapi [label="(XML)"];
-$msg =~ /^.*?\[(.*?)\|(.*?)\|(.*?)\|(.*?)\|(.*?)\](.*?)$/ or die "bad format at line:$i\n$_\n";
+$msg =~ /^.*?\[\s*([^\s]+)\|(.*?)\|(.*?)\|(.*?)\|(.*?)\]\s*(.+)$/ or die "bad format at line:$i\n$_\n";
 ($level,$host2,$domain,$task,$process,$xapimsg)=($1,$2,$3,$4,$5,$6);
 #extract fields
 if($task eq ''){
 	($taskname,$tasktype,$taskid)=('','','')}
 else{
-	if($task =~ /(.+?)([RD]):([[:xdigit:]]{12})/){
+	if($task =~ /([^\s]+)\s+([RD]):([[:xdigit:]]{12})/){
 		($taskname,$tasktype,$taskid)=($1,$2,$3)}
 	else{
 		($taskname,$tasktype,$taskid)=($task,'','')
 		}
 	}
+}
+#Extract msg part
+#,task dispatch:VDI.remove_from_sm_config D:<hex> created by task D:<hex>
+if($msg =~ /task ([^\s]+) ([RD]):([[:xdigit:]]{12}) created by task ([RD]):([[:xdigit:]]{12})/){
 }
 #Fix date to a postgresql timestamp type, see http://www.postgresql.org/docs/current/static/datatype-datetime.html
 #TODO fix ugly hack
