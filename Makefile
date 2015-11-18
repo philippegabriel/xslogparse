@@ -22,14 +22,16 @@ xensource.csv: $(csvtargets)
 	cat $^ >$@
 login:
 	source $(config) ; psql
-initdb: schema.sql
-	source $(config) ; psql -f schema.sql
+initdb: schema.db
+	source $(config) ; psql -f $<
 copytables: xensource.csv
 	source $(config) ; psql -c "\copy xensource from xensource.csv with CSV;" 
-resetdb: reset.table.sql
-	source $(config) ; psql -f reset.table.sql
-query: taskduration.sql
-	source $(config) ; psql --field-separator="," --no-align --tuples-only -f taskduration.sql -o taskduration.csv
+resetdb: reset.table.db
+	source $(config) ; psql -f $<
+%.csv : %.sql
+	source $(config) ; psql --field-separator="," --no-align --tuples-only -f $< -o $@
+query: taskduration.csv VBDPlug.csv
+
 plot:
 	gnuplot taskduration.gnuplot
 test:
