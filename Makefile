@@ -6,7 +6,7 @@ config:=config.xslogparse/.config
 seq:=$(shell seq 10 33)
 lextargets:=$(foreach i,$(seq),xensource.log.$(i).lex)
 csvtargets:=$(foreach i,$(seq),xensource.log.$(i).csv)
-tasks:=VDI.create VDI.attach VBD.create VBD.plug VM.clean_shutdown VM.destroy VM.start
+tasks:=VDI.create VDI.attach VBD.create VBD.plug VM.clean_shutdown VM.destroy VM.start all
 querytargets:=$(foreach i,$(tasks),duration.$i.csv)
 plottargets:=$(subst .csv,.png,$(querytargets))
 all: xensource.csv
