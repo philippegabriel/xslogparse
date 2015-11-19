@@ -2,3 +2,4 @@
 *.lex
 *.log*
 *.png
+!doc/xslogparse.png
