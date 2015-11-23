@@ -1,0 +1,2 @@
+.separator ","
+.import  xensource.csv xensource

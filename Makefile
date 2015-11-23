@@ -4,12 +4,13 @@
 config:=config.xslogparse/.config
 
 seq:=$(shell seq 10 33)
-lextargets:=$(foreach i,$(seq),xensource.log.$(i).lex)
-csvtargets:=$(foreach i,$(seq),xensource.log.$(i).csv)
+csvinputs:=$(foreach i,$(seq),xensource.log.$(i).csv)
+lexinputs:=$(subst .cav,.lex,$(csvtargets))
 tasks:=VDI.create VDI.attach VBD.create VBD.plug VM.clean_shutdown VM.destroy VM.start all
-querytargets:=$(foreach i,$(tasks),duration.$i.csv)
+sqltargets:=$(foreach i,$(tasks),duration.$i.sql)
+csvtargets:=$(subst .sql,.csv,$(sqltargets))
 plottargets:=$(subst .csv,.png,$(querytargets))
-all: xensource.csv
+all: xensource.csv initdb $(csvtargets) $(plottargets)
 xensource.lex: $(lextargets)
 	cat $^ | sort | uniq -c >$@
 xensource.sorted.lex: $(lextargets)
@@ -20,31 +21,25 @@ xensource.ranked.lex: xensource.lex
 	./lexlog.pl $< | sort > $@
 %.csv: %
 	./log2csv.pl $< >$@
-xensource.csv: $(csvtargets)
+xensource.csv: $(csvinputs)
 	cat $^ >$@
-login:
-	source $(config) ; psql
-initdb: schema.db
-	source $(config) ; psql -f $<
-copytables: xensource.csv
-	source $(config) ; psql -c "\copy xensource from xensource.csv with CSV;" 
+initdb: resetdb
+	sqlite3 logsdb < schema.db
+	sqlite3 logsdb < import.db
 resetdb: reset.table.db
-	source $(config) ; psql -f $<
-duration.%.csv : duration.sql
-	source $(config) ; psql --field-separator="," --no-align --pset footer=off --variable=TASK="$*" -f $< -o $@
+	rm -rf logsdb
+duration.%.sql: duration.sql.m4
+	m4 -D task=$* $< > $@ 
+duration.%.csv : duration.%.sql
+	sqlite3 --csv logsdb <$< >$@
 %.png: %.csv
 	gnuplot -e "outfile='$@';infile='$<'" duration.gnuplot
-query: $(querytargets)
+query: $(csvtargets)
 plot: $(plottargets) 
-test:
-	@echo $(csvtargets)
+test: $(sqltargets)
 deploy:
 	source $(config) ; scp *.png *.html $$WWW
-qclean:
-	rm -f $(querytargets)
-pclean:
-	rm -f $(plottargets)
 clean:
-	rm -f xensource.lex xensource.ranked.lex xensource.csv
-reallyclean: clean
-	rm -f $(lextargets) $(csvtargets)
+	rm -f $(sqltargets) $(csvtargets) $(plottargets)
+reallyclean: clean resetdb
+	rm -f *.csv *.sql *.lex
